@@ -1,0 +1,6 @@
+.idea
+*.pyc
+# VSCode
+.vscode
+*.env
+*.whl
