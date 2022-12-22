@@ -2,7 +2,8 @@ import dotenv
 from urllib.parse import urlparse
 import os
 from azure.storage.blob.aio import ContainerClient
-from osgeo import gdal, gdalconst, ogr, osr
+from osgeo import ogr
+from .upload import upload_file
 import logging
 import asyncio
 import json
@@ -56,9 +57,8 @@ def compute_layer(signed_blob_path=None, lid=None, clist=None, countries_geojson
     return r
 
 
-async def list_blobs(container_sas_url=None, countries_geojson_path=None, countries_json_path=None, name_prefix=None, n_proc_parallel = 15):
+async def list_blobs(sids_data_container_sas_url=None, sids_container_sas_url=None,   countries_geojson_path=None, countries_json_path=None, name_prefix=None, n_proc_parallel = 15):
     clist = read_countries(countries_json_path)
-    print(len(clist))
     countries_ds = ogr.Open(countries_geojson_path)
     cl = countries_ds.GetLayer()
     cnames = list()
@@ -74,11 +74,12 @@ async def list_blobs(container_sas_url=None, countries_geojson_path=None, countr
     failed = dict()
     rfailed = list()
     layers = dict()
-    with open('sids_country_data.csv', 'w') as fp:
+    out_file_name =f'{name_prefix}_country_data.csv'
+    with open(out_file_name, 'w') as fp:
         with ThreadPoolExecutor(max_workers=n_proc_parallel) as executor:
             fp.write(f'{",".join(["AGGREGATION", "LAYERID"] + cnames)}\n')
 
-            async with ContainerClient.from_container_url(container_sas_url) as container:
+            async with ContainerClient.from_container_url(sids_data_container_sas_url) as container:
                 blobs_list = container.list_blobs(name_starts_with=name_prefix, timeout=300)
                 parsed = urlparse(container.url)
 
@@ -153,15 +154,27 @@ async def list_blobs(container_sas_url=None, countries_geojson_path=None, countr
                         rfailed.append(lid, failed[lid])
 
     print(rfailed)
+    # upload
+    dst_file_name = f'countries-processing/{out_file_name}'
+    async with ContainerClient.from_container_url(sids_container_sas_url) as c:
+
+        await upload_file(
+            container_client_instance=c,
+            src=out_file_name,
+            dst_blob_name=dst_file_name,
+            overwrite=True
+        )
+        logger.info(f'{dst_file_name} was uploaded to sids container')
 
 
 if __name__ == '__main__':
     logging.basicConfig()
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-
-    sas_url = dotenv.get_key('.env', 'SIDS_DATA_CONTAINER')
-    parsed = urlparse(sas_url)
+    prefixes = 'admin0', 'admin1', 'admin2', 'hex-10km', 'hex-5km', 'hex-1km', 'hex-10km-ocean', 'grid-10km', 'grid-5km', 'grid-1km', 'grid-10km-ocean'
+    sids_data_container_sas_url = dotenv.get_key('.env', 'SIDS_DATA_CONTAINER')
+    sids_container_sas_url = dotenv.get_key('.env', 'SIDS_CONTAINER')
+    parsed = urlparse(sids_data_container_sas_url)
     # AZURE_SAS and AZURE_STORAGE_SAS_TOKEN
     azure_storage_account = parsed.netloc.split('.')[0]
     azure_sas_token = parsed.query
@@ -186,8 +199,12 @@ if __name__ == '__main__':
     countries_geojson = 'uncountries3857.gpkg'
     countries_json = 'sidsCodes.json'
     name_prefix = sys.argv[1]
+
+
+    assert name_prefix in prefixes, f'second arg {name_prefix} must be one of the following {",".join(prefixes)}'
+
     n_proc_parallel = int(sys.argv[2]) if len(sys.argv) > 2 else 15
-    asyncio.run(list_blobs(container_sas_url=sas_url,
+    asyncio.run(list_blobs(sids_data_container_sas_url=sids_data_container_sas_url,
                            countries_geojson_path=countries_geojson,
                            countries_json_path=countries_json,
                            name_prefix=name_prefix,

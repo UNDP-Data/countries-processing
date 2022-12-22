@@ -1,0 +1,12 @@
+version: "3"
+services:
+  sidscountries:
+    build:
+        context: .
+        dockerfile: ./Dockerfile
+    image: sidscountriesproc:latest
+    restart: unless-stopped
+    container_name: sidscountriesproc
+    env_file:
+      - .env
+
