@@ -14,5 +14,5 @@ COPY . .
 
 ENTRYPOINT ["python3", "check_countries.py"]
 
-CMD ["admin"]
+CMD ["admin0"]
 
