@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 import os
 from azure.storage.blob.aio import ContainerClient
 from osgeo import ogr
-from .upload import upload_file
+from upload import upload_file
 import logging
 import asyncio
 import json
@@ -86,8 +86,10 @@ async def list_blobs(sids_data_container_sas_url=None, sids_container_sas_url=No
                 async for blob in blobs_list:
                     if blob.name.endswith(m):
                         path, metafname = os.path.split(blob.name)
+                        sunit, lid, *r = path.split('_')
+                        #logger.info(f'detected layer {blob.name}')
+                        if sunit != name_prefix:continue
                         logger.info(f'found layer {blob.name}')
-                        sunit, lid = path.split('_')
                         blob_full_path = os.path.join(f'{parsed.scheme}://{parsed.netloc}{parsed.path}', path,
                                                       '0/0/0.pbf')
                         signed_blob_path = f'MVT:{blob_full_path}{container._query_str}'
@@ -201,7 +203,7 @@ if __name__ == '__main__':
     name_prefix = sys.argv[1]
 
 
-    assert name_prefix in prefixes, f'second arg {name_prefix} must be one of the following {",".join(prefixes)}'
+    assert name_prefix in prefixes, f'second arg {name_prefix} must be one of the following {" ".join(prefixes)}'
 
     n_proc_parallel = int(sys.argv[2]) if len(sys.argv) > 2 else 15
     asyncio.run(list_blobs(sids_data_container_sas_url=sids_data_container_sas_url,
