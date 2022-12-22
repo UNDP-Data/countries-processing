@@ -1,11 +1,11 @@
-apiVersion: "2021-07-01"
+apiVersion: "2021-10-01"
 name: cproc-$PREFIX
-location: westeurope
+location: northeurope
 properties:
   osType: Linux
   restartPolicy: Never
   containers:
-    - name: cproc-admin0
+    - name: cproc-$PREFIX
       properties:
         environmentVariables:
           - name: SIDS_DATA_CONTAINER
@@ -13,8 +13,7 @@ properties:
           - name: SIDS_CONTAINER
             value: $SIDS_CONTAINER
         image: undpgeohub.azurecr.io/undp-data/countries-processing:main
-        command:
-          - $PREFIX
+        command: [python,check_countries.py,$PREFIX]
         resources:
           requests:
             cpu: 1
