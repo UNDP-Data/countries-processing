@@ -153,7 +153,7 @@ async def list_blobs(sids_data_container_sas_url=None, sids_container_sas_url=No
                         fp.flush()
                     except Exception as e:
                         logger.error(f'{lid} failed with {e}')
-                        rfailed.append(lid, failed[lid])
+                        rfailed.append([failed[lid]])
 
     print(rfailed)
     # upload
