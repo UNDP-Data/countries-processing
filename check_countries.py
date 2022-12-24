@@ -32,6 +32,7 @@ def read_countries(path):
 
 def compute_layer(signed_blob_path=None, lid=None, clist=None, countries_geojson_path=None):
     logger.debug(f'computing countries for layer {lid}')
+
     ds = ogr.Open(signed_blob_path)
     layer = ds.GetLayer()
     countries_ds = ogr.Open(countries_geojson_path)
@@ -57,7 +58,12 @@ def compute_layer(signed_blob_path=None, lid=None, clist=None, countries_geojson
     return r
 
 
-async def list_blobs(sids_data_container_sas_url=None, sids_container_sas_url=None,   countries_geojson_path=None, countries_json_path=None, name_prefix=None, n_proc_parallel = 15):
+async def list_blobs(sids_data_container_sas_url=None,
+                     sids_container_sas_url=None,
+                     countries_geojson_path=None,
+                     countries_json_path=None,
+                     name_prefix=None,
+                     n_proc_parallel = 15):
     clist = read_countries(countries_json_path)
     countries_ds = ogr.Open(countries_geojson_path)
     cl = countries_ds.GetLayer()
@@ -176,6 +182,8 @@ if __name__ == '__main__':
     prefixes = 'admin0', 'admin1', 'admin2', 'hex-10km', 'hex-5km', 'hex-1km', 'hex-10km-ocean', 'grid-10km', 'grid-5km', 'grid-1km', 'grid-10km-ocean'
     sids_data_container_sas_url = dotenv.get_key('.env', 'SIDS_DATA_CONTAINER')
     sids_container_sas_url = dotenv.get_key('.env', 'SIDS_CONTAINER')
+    assert type(sids_data_container_sas_url) == str, f'invalid sids_data_container_sas_url={sids_data_container_sas_url}'
+    assert type(sids_container_sas_url) == str, f'invalid sids_container_sas_url={sids_container_sas_url}'
     parsed = urlparse(sids_data_container_sas_url)
     # AZURE_SAS and AZURE_STORAGE_SAS_TOKEN
     azure_storage_account = parsed.netloc.split('.')[0]
@@ -200,14 +208,19 @@ if __name__ == '__main__':
     azlogger.setLevel(logging.WARNING)
     countries_geojson = 'uncountries3857.gpkg'
     countries_json = 'sidsCodes.json'
+
     name_prefix = sys.argv[1]
+
+
 
 
     assert name_prefix in prefixes, f'second arg {name_prefix} must be one of the following {" ".join(prefixes)}'
 
-    n_proc_parallel = int(sys.argv[2]) if len(sys.argv) > 2 else 15
+    n_proc_parallel = int(sys.argv[2]) if len(sys.argv) > 2 else 4
     asyncio.run(list_blobs(sids_data_container_sas_url=sids_data_container_sas_url,
+                           sids_container_sas_url=sids_container_sas_url,
                            countries_geojson_path=countries_geojson,
                            countries_json_path=countries_json,
                            name_prefix=name_prefix,
-                           n_proc_parallel=n_proc_parallel))
+                           n_proc_parallel=n_proc_parallel)
+                )
