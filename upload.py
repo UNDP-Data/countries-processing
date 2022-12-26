@@ -4,7 +4,8 @@ import logging
 from urllib.parse import urlparse
 import os
 from azure.storage.blob.aio import ContainerClient
-sids_sas_url = dotenv.get_key('./cli/.env', 'SIDS_CONTAINER')
+#sids_sas_url = dotenv.get_key('./cli/.env', 'SIDS_CONTAINER')
+container_sas_url = dotenv.get_key('.env', 'SIDS_CONTAINER')
 
 logger = logging.getLogger()
 

@@ -3,7 +3,7 @@ for prefix in 'admin0' 'admin1' 'admin2' 'hex-10km' 'hex-5km' 'hex-1km' 'hex-10k
   export PREFIX=$prefix
   eval $(cat ./.env | sed 's/^/export /')
   envsubst < manifest.tpl.yml > manifest.yml
-
+  exit
   az container delete --resource-group undpdpbppssdganalyticsgeo --name cproc-$PREFIX --yes
   az container create --resource-group undpdpbppssdganalyticsgeo --file manifest.yml
 
