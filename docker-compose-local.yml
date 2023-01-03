@@ -9,5 +9,5 @@ services:
     container_name: sidscountriesproc
     command: grid-10km
     env_file:
-      - .env
+      - ./cli/.env
 

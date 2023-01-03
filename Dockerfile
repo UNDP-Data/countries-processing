@@ -6,7 +6,6 @@ RUN apt-get update \
 RUN apt-get -y install python3-pip
 RUN python3 -m pip install -U pip
 RUN python3 -m pip install azure-storage-blob aiohttp
-RUN python3 -m pip install python-dotenv
 RUN mkdir /opt/sidscountriesproc
 WORKDIR /opt/sidscountriesproc
 

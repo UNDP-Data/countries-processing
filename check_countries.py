@@ -1,4 +1,3 @@
-import dotenv
 from urllib.parse import urlparse
 import os
 from azure.storage.blob.aio import ContainerClient
@@ -180,8 +179,8 @@ if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     prefixes = 'admin0', 'admin1', 'admin2', 'hex-10km', 'hex-5km', 'hex-1km', 'hex-10km-ocean', 'grid-10km', 'grid-5km', 'grid-1km', 'grid-10km-ocean'
-    sids_data_container_sas_url = dotenv.get_key('.env', 'SIDS_DATA_CONTAINER')
-    sids_container_sas_url = dotenv.get_key('.env', 'SIDS_CONTAINER')
+    sids_data_container_sas_url = os.environ.get('SIDS_DATA_CONTAINER', None)
+    sids_container_sas_url = os.environ.get('SIDS_CONTAINER', None)
     assert type(sids_data_container_sas_url) == str, f'invalid sids_data_container_sas_url={sids_data_container_sas_url}'
     assert type(sids_container_sas_url) == str, f'invalid sids_container_sas_url={sids_container_sas_url}'
     parsed = urlparse(sids_data_container_sas_url)
