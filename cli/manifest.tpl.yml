@@ -16,8 +16,8 @@ properties:
         command: [python,check_countries.py,$PREFIX]
         resources:
           requests:
-            cpu: 2
-            memoryInGB: 2
+            cpu: 4
+            memoryInGB: 4
   imageRegistryCredentials:
     - server: undpgeohub.azurecr.io
       username: $AZURE_REGISTRY_USERNAME

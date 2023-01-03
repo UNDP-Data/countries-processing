@@ -1,11 +1,10 @@
-import dotenv
+
 import asyncio
 import logging
 from urllib.parse import urlparse
 import os
 from azure.storage.blob.aio import ContainerClient
-#sids_sas_url = dotenv.get_key('./cli/.env', 'SIDS_CONTAINER')
-sids_sas_url = dotenv.get_key('.env', 'SIDS_CONTAINER')
+
 
 logger = logging.getLogger()
 
@@ -43,6 +42,8 @@ async def upload_file(container_client_instance=None, src=None, dst_blob_name=No
 
 
 if __name__ == '__main__':
+    import dotenv
+    sids_sas_url = dotenv.get_key('./cli/.env', 'SIDS_CONTAINER')
     async def azup(fname=None, container_sas_url=None):
         async with ContainerClient.from_container_url(container_sas_url) as container:
             print(f'connected')
