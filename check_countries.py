@@ -44,7 +44,7 @@ def compute_layer(signed_blob_path=None, lid=None, clist=None, countries_geojson
             minX, maxX, minY, maxY = geom.GetEnvelope()
             layer.SetSpatialFilterRect(minX, minY, maxX, maxY)
             # layer.SetSpatialFilter(geom)
-            has = True if layer.GetFeatureCount() > 0 else False
+            has  = True if [float(feat.GetField('mean') )  for feat in layer if feat.GetField('mean') is not None] else False
 
             r.append(str(has))
             if cl.GetFeatureCount() > 1:
@@ -131,7 +131,7 @@ async def list_blobs(sids_data_container_sas_url=None,
                     # retrieve the result
                     try:
                         result = future.result(timeout=5)
-
+                        result.insert(0, name_prefix)
                         l = ','.join(result)
                         fp.write(f'{l}\n')
                         fp.flush()
@@ -153,6 +153,7 @@ async def list_blobs(sids_data_container_sas_url=None,
                     # retrieve the result
                     try:
                         result = future.result(timeout=5)
+                        result.insert(0, name_prefix)
                         l = ','.join(result)
                         fp.write(f'{l}\n')
                         fp.flush()
@@ -160,7 +161,6 @@ async def list_blobs(sids_data_container_sas_url=None,
                         logger.error(f'{lid} failed with {e}')
                         rfailed.append([failed[lid]])
 
-    print(rfailed)
     # upload
     dst_file_name = f'countries-processing/{out_file_name}'
     async with ContainerClient.from_container_url(sids_container_sas_url) as c:
