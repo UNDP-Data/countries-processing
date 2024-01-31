@@ -1,0 +1,32 @@
+apiVersion: "2021-10-01"
+name: gdal
+location: swedencentral
+properties:
+  osType: Linux
+  restartPolicy: Never
+  containers:
+    - name: gdal
+      properties:
+        environmentVariables:
+          - name: AZURE_STORAGE_CONNECTION_STRING
+            value: $AZURE_STORAGE_CONNECTION_STRING
+          - name: GEOHUBDB
+            value: $GEOHUBDB
+          - name: CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE
+            value: YES
+        image: ghcr.io/osgeo/gdal:ubuntu-small-$GDAL_VERSION
+        #command: ["bash", "-c", "sleep infinity"]
+        #command: ['gdalwarp', '-te', '-21', '-35', '57', '38', '-of', 'COG', '/vsicurl/https://globalwindatlas.info/api/gis/global/wind-speed/50', '/vsiaz/drr/ceei/wind_speed_50.tif', '-overwrite', '-wo', 'NUM_THREADS=ALL_CPUS', '-multi', '-r', 'near']
+        command: ['gdalwarp', '-te', '-27', '-35', '65', '38', '-of', 'GTiff', '/vsicurl/https://globalwindatlas.info/api/gis/global/wind-speed/50', 'wind_speed_50.tif', '-overwrite', '-wo', 'NUM_THREADS=ALL_CPUS', '-multi', '-r', 'near']
+
+        #command: ["gdalinfo", "--formats"]
+        resources:
+          requests:
+            cpu: 4
+            memoryInGB: 16
+
+tags: {}
+type: Microsoft.ContainerInstance/containerGroups
+
+
+

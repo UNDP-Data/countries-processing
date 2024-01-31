@@ -24,3 +24,6 @@ properties:
       password: $AZURE_REGISTRY_PASSWORD
 tags: {}
 type: Microsoft.ContainerInstance/containerGroups
+
+
+
